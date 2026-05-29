@@ -57,14 +57,20 @@ Sistem ini dibangun dengan mengintegrasikan teknologi pemetaan GIS berbasis web 
     └── DEALERMOBILBARU_fix_3.js # Data koordinat titik spasial diler & showroom
 ```
 ---
-👥 Kreator (Kelompok 4)
-Aplikasi ini dikembangkan secara kolaboratif sebagai Proyek Tugas Akhir Mata Kuliah Sistem Informasi Geografis oleh[cite::
 
-Nama Anggota 1
-Nama Anggota 2
-Nama Anggota 3
-Nama Anggota 4
-Nama Anggota 5
+## 👥 Kreator (Kelompok 4)
+Aplikasi ini dikembangkan secara kolaboratif sebagai Proyek Tugas Akhir Mata Kuliah Sistem Informasi Geografis oleh:
+
+Kelvin Harmen S
+
+Nashwa Shifa N
+
+Dafa Najwa
+
+M Attalah Rifqi
+
+Aditya Deval Pranata
+
 ---
 
 Aplikasi ini bisa lansung anda nikmati di website kami 
