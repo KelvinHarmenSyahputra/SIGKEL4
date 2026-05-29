@@ -47,7 +47,7 @@ Sistem ini dibangun dengan mengintegrasikan teknologi pemetaan GIS berbasis web 
 
 ## 📁 Struktur Direktori Proyek
 
-
+```text
 ├── index.html               # File utama struktur antarmuka & tata letak aplikasi
 ├── css/                     # Modul gaya tampilan (Leaflet, MarkerCluster, qgis2web, FontAwesome)
 ├── js/                      # Logika aplikasi, plugin Leaflet, dan engine ekspresi QGIS
@@ -55,17 +55,19 @@ Sistem ini dibangun dengan mengintegrasikan teknologi pemetaan GIS berbasis web 
     ├── pekanbaru_1.js       # Data batas administrasi / wilayah Kota Pekanbaru
     ├── jalan_2.js           # Data jaringan jalan raya Kota Pekanbaru
     └── DEALERMOBILBARU_fix_3.js # Data koordinat titik spasial diler & showroom
-
+```
 ---
 👥 Kreator (Kelompok 4)
-Aplikasi ini dikembangkan secara kolaboratif sebagai Proyek Tugas Akhir Mata Kuliah Sistem Informasi Geografis oleh[cite: 1]:
+Aplikasi ini dikembangkan secara kolaboratif sebagai Proyek Tugas Akhir Mata Kuliah Sistem Informasi Geografis oleh[cite::
 
 Nama Anggota 1
-
 Nama Anggota 2
-
 Nama Anggota 3
-
 Nama Anggota 4
-
 Nama Anggota 5
+---
+
+Aplikasi ini bisa lansung anda nikmati di website kami 
+```text
+https://kelvinharmensyahputra.github.io/SIGKEL4
+```
