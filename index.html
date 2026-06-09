@@ -251,7 +251,7 @@
             border-radius:14px !important;
             color:rgba(255,255,255,.75) !important;
             box-shadow:0 8px 32px rgba(0,0,0,.5) !important;
-            margin:0 10px 10px 0 !important;
+            margin:0 10px 80px 0 !important;
         }
 
         /* attribution */
@@ -529,6 +529,70 @@
             margin-left:10px;flex-shrink:0;
         }
         .nav-about-btn:hover{background:rgba(255,255,255,.13);color:#fff;}
+
+        /* ── Tombol Minimize — hanya tampil di mobile ── */
+        #btn-minimize {
+            display:none;
+            position:absolute; top:8px; left:10px;
+            background:rgba(0,0,0,.5); backdrop-filter:blur(8px);
+            border:1px solid rgba(255,255,255,.2);
+            color:#fff; border-radius:6px;
+            padding:3px 9px; font-size:10px; font-weight:600;
+            cursor:pointer; font-family:inherit; z-index:10;
+            align-items:center; gap:4px;
+        }
+
+        /* ── Route info pill (mobile) — di atas filter bar ── */
+        #route-bar-bottom {
+            display:none;
+            position:fixed; bottom:72px; left:50%; transform:translateX(-50%);
+            z-index:1001;
+            background:linear-gradient(90deg,rgba(5,150,105,.92),rgba(29,78,216,.85));
+            backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+            border:1px solid rgba(255,255,255,.15); border-radius:999px;
+            padding:8px 14px; white-space:nowrap;
+            align-items:center; gap:8px;
+            font-size:11px; font-weight:600; color:#fff;
+            box-shadow:0 4px 20px rgba(0,0,0,.5);
+            max-width:calc(100vw - 32px);
+        }
+        #route-bar-bottom.on { display:flex; }
+        #route-bar-bottom .rbb-btn {
+            background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.3);
+            color:#fff; border-radius:999px; padding:3px 10px;
+            font-size:10px; font-weight:600; cursor:pointer; font-family:inherit;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width:600px) {
+            /* Navbar compact full-width */
+            #navbar {
+                top:10px; left:10px; right:10px;
+                transform:none; padding:6px 8px 6px 12px;
+            }
+            .nav-logo { font-size:10px; margin-right:8px; flex-shrink:0; }
+            .nav-divider { margin-right:8px; }
+            .nav-search-wrap { flex:1; min-width:0; }
+            .nav-search-wrap input { min-width:0; width:100%; font-size:12px; padding:5px 8px 5px 26px; }
+            .nav-about-btn { font-size:10px; padding:4px 9px; margin-left:6px; }
+            #search-dropdown { left:0; right:0; min-width:100%; }
+
+            /* Controls turun */
+            .leaflet-top.leaflet-left { top:62px; left:10px; }
+            #locate-btn { top:162px; left:10px; }
+
+            /* Panel: tetap 260px di kanan, posisi turun sedikit karena navbar lebih kecil */
+            #info-panel { top:62px; right:10px; }
+
+            /* Tombol minimize muncul */
+            #btn-minimize { display:flex !important; }
+
+            /* State minimize: panel jadi strip tipis */
+            #info-panel.minimized { max-height:42px !important; overflow:hidden; }
+            #info-panel.minimized .p-photo,
+            #info-panel.minimized #route-bar,
+            #info-panel.minimized .p-body { display:none !important; }
+        }
         </style>
         <title>BuyCar Maps - Dealer Pekanbaru</title>
         <title></title>
@@ -684,6 +748,7 @@
                 <img id="p-photo-img" src="" alt="" style="display:none">
                 <div class="p-photo-overlay"></div>
                 <button class="p-close" onclick="closePanel()">&#10005;</button>
+                <button id="btn-minimize" onclick="toggleMinimize()">&#8722; Perkecil</button>
             </div>
             <div id="route-bar">
                 <span id="route-text">Menghitung rute...</span>
@@ -725,6 +790,13 @@
                     Buka di Google Maps
                 </button>
             </div>
+        </div>
+
+        <!-- ROUTE INFO PILL MOBILE -->
+        <div id="route-bar-bottom">
+            <span id="rbb-text">Menghitung rute...</span>
+            <button class="rbb-btn" onclick="expandPanel()">&#8679; Buka</button>
+            <button class="rbb-btn" onclick="clearRoute()">&#10005; Hapus</button>
         </div>
 
         <!-- BOTTOM FILTER BAR -->
@@ -1310,6 +1382,7 @@
         var _searchData  = null;
         var _userMarker  = null;   // car icon on map
         var _selMarker   = null;   // selected marker highlight
+        var _isMinimized = false;
 
         // ── Car icon SVG for user location ──
         function carIcon() {
@@ -1437,13 +1510,18 @@
             refreshDist();
             if (_routeLayer) { map.removeLayer(_routeLayer); _routeLayer=null; }
             document.getElementById('route-bar').classList.remove('on');
+            document.getElementById('route-bar-bottom').classList.remove('on');
+            _isMinimized=false;
+            document.getElementById('info-panel').classList.remove('minimized');
+            document.getElementById('btn-minimize').innerHTML='&#8722; Perkecil';
             document.getElementById('info-panel').classList.add('visible');
         }
 
         function closePanel() {
-            document.getElementById('info-panel').classList.remove('visible');
-            clearSelected();
-            clearRoute();
+            document.getElementById('info-panel').classList.remove('visible','minimized');
+            document.getElementById('route-bar-bottom').classList.remove('on');
+            _isMinimized=false;
+            clearSelected(); clearRoute();
         }
 
         function openGmaps() { if (_gmapsLink) window.open(_gmapsLink,'_blank'); }
@@ -1451,9 +1529,9 @@
         function showRoute() {
             if (_userLat===null) { alert('Aktifkan GPS terlebih dahulu.'); return; }
             if (_routeLayer) { map.removeLayer(_routeLayer); _routeLayer=null; }
-            var rb=document.getElementById('route-bar');
-            rb.classList.add('on');
+            document.getElementById('route-bar').classList.add('on');
             document.getElementById('route-text').textContent='Menghitung rute...';
+            document.getElementById('rbb-text').textContent='Menghitung rute...';
             var url='https://router.project-osrm.org/route/v1/driving/'
                 +_userLng+','+_userLat+';'+_destLng+','+_destLat
                 +'?overview=full&geometries=geojson';
@@ -1462,12 +1540,14 @@
             .then(function(d){
                 if (d.routes&&d.routes[0]) {
                     var r=d.routes[0];
-                    document.getElementById('route-text').textContent=
-                        '🚗 '+(r.distance/1000).toFixed(1)+' km · ~'+Math.round(r.duration/60)+' menit';
+                    var txt='🚗 '+(r.distance/1000).toFixed(1)+' km · ~'+Math.round(r.duration/60)+' menit';
+                    document.getElementById('route-text').textContent=txt;
+                    document.getElementById('rbb-text').textContent=txt;
                     _routeLayer=L.geoJSON(r.geometry,{style:{color:'#60a5fa',weight:5,opacity:.9}}).addTo(map);
                     map.fitBounds(L.latLngBounds(r.geometry.coordinates.map(function(c){return[c[1],c[0]];})),{padding:[80,80]});
-                } else { straightLine(); document.getElementById('route-text').textContent='Rute tidak tersedia'; }
-            }).catch(function(){straightLine(); document.getElementById('route-text').textContent='Offline - garis lurus';});
+                    if (window.innerWidth<=600) { minimizePanel(); }
+                } else { straightLine(); document.getElementById('route-text').textContent='Rute tidak tersedia'; document.getElementById('rbb-text').textContent='Rute tidak tersedia'; }
+            }).catch(function(){ straightLine(); document.getElementById('route-text').textContent='Offline'; document.getElementById('rbb-text').textContent='Offline'; });
         }
 
         function straightLine() {
@@ -1479,7 +1559,23 @@
         function clearRoute() {
             if (_routeLayer){map.removeLayer(_routeLayer);_routeLayer=null;}
             document.getElementById('route-bar').classList.remove('on');
+            document.getElementById('route-bar-bottom').classList.remove('on');
         }
+
+        function minimizePanel() {
+            _isMinimized=true;
+            document.getElementById('info-panel').classList.add('minimized');
+            document.getElementById('btn-minimize').innerHTML='&#8679; Buka';
+            if (document.getElementById('route-bar').classList.contains('on'))
+                document.getElementById('route-bar-bottom').classList.add('on');
+        }
+        function expandPanel() {
+            _isMinimized=false;
+            document.getElementById('info-panel').classList.remove('minimized');
+            document.getElementById('btn-minimize').innerHTML='&#8722; Perkecil';
+            document.getElementById('route-bar-bottom').classList.remove('on');
+        }
+        function toggleMinimize() { if(_isMinimized){expandPanel();}else{minimizePanel();} }
 
         // ── Filter ──
         function setFilter(mode) {
@@ -1547,6 +1643,8 @@
                 document.getElementById('search-dropdown').classList.remove('open');
         });
 
+        document.getElementById('info-panel').addEventListener('click',function(e){e.stopPropagation();});
+        document.getElementById('route-bar-bottom').addEventListener('click',function(e){e.stopPropagation();});
         map.on('click',function(){closePanel();});
 
         // ── Loading screen ──
